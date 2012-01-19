@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
+using Castle.Windsor.Installer;
 
 namespace ioc_demo_console
 {
@@ -12,8 +14,7 @@ namespace ioc_demo_console
         static void Main(string[] args)
         {
             var container = new WindsorContainer();
-            container.Register(Component.For<ISomeOtherThing>().ImplementedBy<SomeOtherThing>());
-            container.Register(Component.For<IMyThing>().ImplementedBy<MyThing>());
+            container.Install(FromAssembly.InDirectory(new AssemblyFilter("")));
 
             var myThing = container.Resolve<IMyThing>();
             myThing.DoWork();
@@ -22,12 +23,21 @@ namespace ioc_demo_console
         }
     }
 
-    internal interface IMyThing
+    public class Installer : IWindsorInstaller
+    {
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(Component.For<ISomeOtherThing>().ImplementedBy<SomeOtherThing>());
+            container.Register(Component.For<IMyThing>().ImplementedBy<MyThing>());
+        }
+    }
+
+    interface IMyThing
     {
         void DoWork();
     }
 
-    internal class MyThing : IMyThing
+    class MyThing : IMyThing
     {
         private readonly ISomeOtherThing otherThing;
 
@@ -42,7 +52,7 @@ namespace ioc_demo_console
         }
     }
 
-    internal interface ISomeOtherThing
+    interface ISomeOtherThing
     {
         string GetCustomText();
     }
