@@ -1,0 +1,1 @@
+﻿A simple example using Windsor in a console app
